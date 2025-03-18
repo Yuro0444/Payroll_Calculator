@@ -12,20 +12,24 @@ session_start();
     <script>
         async function calculateSalary(event) {
             if (event.key === "Enter") {
-                let salary = document.getElementById("salary").value;
+                
                 let name = document.getElementById("name").value;
+                let hoursWorked = parseFloat(document.getElementById("hoursWorked").value);
+                let hourlyRate = parseFloat(document.getElementById("hourlyRate").value);
 
-                if (salary !== "" && name !== "") {
+                if (!isNaN(hoursWorked) && !isNaN(hourlyRate) && name !== "") {
+                    let salary = hoursWorked * hourlyRate;
+                    document.getElementById("salary").value = salary.toFixed(2);
+                    
                     try {
                         let response = await fetch("process_salary.php", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ name: name, salary: parseFloat(salary) })
+                            body: JSON.stringify({ name: name, salary: salary })
                         });
 
                         let result = await response.json();
 
-                        
                         if (response.ok) {
                             document.getElementById("result").innerHTML = `
                                 <p><strong>Name:</strong> ${result.name}</p>
@@ -47,6 +51,7 @@ session_start();
                 }
             }
         }
+
 
         async function loadRecords() {
             try {
@@ -113,10 +118,12 @@ session_start();
         <h2>Payroll System</h2>
         <label for="name">Employee Name:</label>
         <input type="text" id="name" placeholder="Enter name">
-        <label for="salary">Enter Salary:</label>
-        <input type="number" id="salary" placeholder="Enter gross salary" onkeypress="calculateSalary(event)">
-        <input type="hidden" id="editId">
-        <button id="saveButton" onclick="updateSalary()" style="display:none;">Save Changes</button>
+        <label for="hoursWorked">Hours Worked:</label>
+        <input type="number" id="hoursWorked" placeholder="Enter hours worked" onkeypress="calculateSalary(event)">
+        <label for="hourlyRate">Hourly Rate:</label>
+        <input type="number" id="hourlyRate" placeholder="Enter hourly rate" onkeypress="calculateSalary(event)">
+        <label for="salary">Gross Salary:</label>
+        <input type="number" id="salary" placeholder="Calculated gross salary" readonly>
         <div id="result"></div>
         <h3>Employee Records</h3>
         <div id="records"></div>

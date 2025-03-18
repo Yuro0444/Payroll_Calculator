@@ -71,16 +71,38 @@ th {
     color: white;
 }
 
-/* Delete Button */
+/* Buttons */
 button {
-    background-color: red;
-    color: white;
     padding: 5px 10px;
     border: none;
     cursor: pointer;
     border-radius: 5px;
+    font-size: 14px;
 }
 
-button:hover {
+/* Delete Button */
+.delete-btn {
+    background-color: red;
+    color: white;
+}
+
+.delete-btn:hover {
     background-color: darkred;
 }
+
+/* Edit Button */
+.edit-btn {
+    background-color: blue;
+    color: white;
+    margin-left: 5px;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.edit-btn:hover {
+    background-color: darkblue;
+}
+
