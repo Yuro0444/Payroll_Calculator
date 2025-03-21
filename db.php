@@ -158,7 +158,6 @@ try {
             (166667.00, 666667.00, 33541.80, 0.30),
             (666667.00, 99999999.99, 183541.80, 0.35)");
     }
-       
     
 } catch (PDOException $e) {
     die("Connection failed: " . $e->getMessage());
