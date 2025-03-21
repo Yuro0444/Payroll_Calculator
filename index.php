@@ -41,8 +41,7 @@ include("db.php");
                                 <p><strong>Pag-IBIG Deduction:</strong> ${result.pagibig.toFixed(2)}</p>  
                                 <p><strong>Taxable Income:</strong> ${result.taxable_income.toFixed(2)}</p>
                                 <p><strong>Withholding Tax:</strong> ${result.withholding_tax.toFixed(2)}</p>
-                                <p><strong>Net Salary:</strong> ${result.net_salary.toFixed(2)}</p>
-                            `;
+                                <p><strong>Net Salary:</strong> ${result.net_salary.toFixed(2)}</p> `;
                             loadRecords();
                         } else {
                             document.getElementById("result").innerHTML = `<p style="color:red;">${result.error}</p>`;
