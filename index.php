@@ -31,6 +31,12 @@ include("db.php");
 
                         let result = await response.json();
                         result.pagibig = Number(result.pagibig) || 0;
+                        result.sss = Number(result.sss) || 0;
+                        result.philhealth = Number(result.philhealth) || 0;
+                        result.taxable_income = Number(result.taxable_income) || 0;
+                        result.withholding_tax = Number(result.withholding_tax) || 0;
+                        result.net_salary = Number(result.net_salary) || 0;
+
 
                         if (response.ok) {
                             document.getElementById("result").innerHTML = `
