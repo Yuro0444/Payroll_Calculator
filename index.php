@@ -30,6 +30,7 @@ include("db.php");
                         });
 
                         let result = await response.json();
+                        result.pagibig = Number(result.pagibig) || 0;
 
                         if (response.ok) {
                             document.getElementById("result").innerHTML = `
@@ -37,10 +38,10 @@ include("db.php");
                                 <p><strong>Gross Salary:</strong> ${result.salary.toFixed(2)}</p>
                                 <p><strong>SSS Deduction:</strong> ${result.sss.toFixed(2)}</p>
                                 <p><strong>PhilHealth Deduction:</strong> ${result.philhealth.toFixed(2)}</p>
-                                <p><strong>Pag-IBIG Deduction:</strong> ${result.pagibig.toFixed(2)}</p>
+                                <p><strong>Pag-IBIG Deduction:</strong> ${result.pagibig.toFixed(2)}</p>  
                                 <p><strong>Taxable Income:</strong> ${result.taxable_income.toFixed(2)}</p>
-                                <p><strong>Tax Due:</strong> ${result.tax_due.toFixed(2)}</p>
-                                <p><strong>Net Salary:</strong> ${result.net_income.toFixed(2)}</p>
+                                <p><strong>Withholding Tax:</strong> ${result.withholding_tax.toFixed(2)}</p>
+                                <p><strong>Net Salary:</strong> ${result.net_salary.toFixed(2)}</p>
                             `;
                             loadRecords();
                         } else {
@@ -52,7 +53,6 @@ include("db.php");
                 }
             }
         }
-
 
         async function loadRecords() {
             try {
