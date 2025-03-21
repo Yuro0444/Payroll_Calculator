@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     function getPagIbig($conn, $salary) {
         $rate = 0;
         $fixed_contribution = 0;
-    
+
         // Query to get the appropriate bracket
         $stmt = $conn->prepare("SELECT rate, fixed_contribution FROM pagibig_bracket 
                                 WHERE ? BETWEEN min_salary AND COALESCE(max_salary, ?)");
