@@ -31,18 +31,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $conn->real_escape_string($data["name"]);
 
     // SSS computation
-    function calculateSSS($salary) {
-        return ($salary < 4250) ? 180 : (($salary <= 29750) ? 180 + ceil(($salary - 4250) / 500.0) * 22.50 : 1350);
+    function getSSS($conn, $salary) {
+        $rate = 0;
+        $monthly_salary_credit = 0;
+    
+        // Query to get the correct bracket
+        $stmt = $conn->prepare("SELECT monthly_salary_credit, rate FROM sss_bracket 
+                                WHERE ? BETWEEN min_salary AND max_salary");
+        $stmt->bind_param("d", $salary);
+        $stmt->execute();
+        $stmt->bind_result($monthly_salary_credit, $rate);
+        $stmt->fetch();
+        $stmt->close();
+    
+        return $monthly_salary_credit * $rate;
     }
 
     // PhilHealth computation
-    function calculatePhilHealth($salary) {
-        return max(250, min(2500, ($salary * 0.05) / 2));
+    function getPhilHealth($conn, $salary) {
+        $rate = 0;
+        $fixed_contribution = 0;
+        $min_salary = 0;
+        $max_salary = NULL; // Can be NULL for open-ended ranges
+        
+        // Query to get the appropriate bracket based on salary
+        $stmt = $conn->prepare("SELECT rate, fixed_contribution, min_salary, max_salary 
+                                    FROM philhealth_bracket 
+                                    WHERE ? BETWEEN min_salary AND COALESCE(max_salary, ?)");
+        $stmt->bind_param("dd", $salary, $salary);
+        $stmt->execute();
+        $stmt->bind_result($rate, $fixed_contribution, $min_salary, $max_salary);
+        $stmt->fetch();
+        $stmt->close();
+        
+        // Determine PhilHealth contribution
+        if ($fixed_contribution > 0) {
+            return $fixed_contribution; // Fixed amount (e.g., ₱500 or ₱5,000)
+        } else {
+            return min(($salary * $rate)/2, 5000); // Ensure it does not exceed max contribution
+        }
     }
 
     // Pag-IBIG computation
-    function calculatePagIbig($salary) {
-        return $salary > 10000 ? 200 : ($salary <= 1500 ? $salary * 0.01 : $salary * 0.02);
+    function getPagIbig($conn, $salary) {
+        $rate = 0;
+        $fixed_contribution = 0;
+    
+        // Query to get the appropriate bracket
+        $stmt = $conn->prepare("SELECT rate, fixed_contribution FROM pagibig_bracket 
+                                WHERE ? BETWEEN min_salary AND COALESCE(max_salary, ?)");
+        $stmt->bind_param("dd", $salary, $salary);
+        $stmt->execute();
+        $stmt->bind_result($rate, $fixed_contribution);
+        $stmt->fetch();
+        $stmt->close();
+    
+        // Determine Pag-IBIG contribution
+        return ($fixed_contribution > 0) ? $fixed_contribution : ($salary * $rate);
     }
 
     // Retrieve tax rate from database
@@ -50,8 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $rate = 0;
         $base_tax = 0;
         $min_income = 0;
-        $max_income = 0;
-        $stmt = $conn->prepare("SELECT rate, base_tax, min_income FROM tax_brackets WHERE ? BETWEEN min_income AND max_income");
+        $stmt = $conn->prepare("SELECT rate, base_tax, min_income FROM withholding_tax_bracket WHERE ? BETWEEN min_income AND max_income");
         $stmt->bind_param("d", $taxableIncome);
         $stmt->execute();
         $stmt->bind_result($rate, $base_tax, $min_income);
@@ -61,21 +105,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Calculate deductions
-    $sss = calculateSSS($salary);
-    $philHealth = calculatePhilHealth($salary);
-    $pagIbig = calculatePagIbig($salary);
+    $sss = getSSS($conn, $salary);
+    $philHealth = getPhilHealth($conn, $salary);
+    $pagIbig = getPagIbig($conn, $salary);
     $taxableIncome = $salary - ($sss + $philHealth + $pagIbig);
 
     // Get tax rate dynamically
     list($rate, $base_tax, $min_income) = getTaxRate($conn, $taxableIncome);
-    $taxDue = $rate * ($taxableIncome - $min_income) + $base_tax;
+    $withholdingTax = $rate * ($taxableIncome - $min_income) + $base_tax;
     
-    $netIncome = $salary - ($sss + $philHealth + $pagIbig + $taxDue);
+    $net_salary = $salary - ($sss + $philHealth + $pagIbig + $withholdingTax);
 
     // Store data in database
-    $stmt = $conn->prepare("INSERT INTO employees (name, salary, sss, philhealth, pagibig, taxable_income, tax_due, net_salary) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sddddddd", $name, $salary, $sss, $philHealth, $pagIbig, $taxableIncome, $taxDue, $netIncome);
+    $stmt = $conn->prepare("INSERT INTO employees (name, salary, sss, philhealth, pagibig, taxable_income, withholding_tax, net_salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sddddddd", $name, $salary, $sss, $philHealth, $pagIbig, $taxableIncome, $withholdingTax, $net_salary);
     $stmt->execute();
     $stmt->close();
 
@@ -87,8 +130,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         "philhealth" => $philHealth,
         "pagibig" => $pagIbig,
         "taxable_income" => $taxableIncome,
-        "tax_due" => $taxDue,
-        "net_income" => $netIncome
+        "withholding_tax" => $withholdingTax,
+        "net_salary" => $net_salary
     ]);
 }
 
