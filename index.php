@@ -145,11 +145,11 @@ include("db.php");
         <nav>
             <ul>
                 <li><a href="index.php">Home</a></li>
-                <li><a href="contributions.html">Contributions</a></li>
-                <li><a href="#deductions">Deductions</a></li>
-                <li><a href="#examples">Computation Examples</a></li>
-                <li><a href="#bonuses">Bonuses & Benefits</a></li>
-                <li><a href="#faq">FAQs</a></li>
+                <li><a href="contributions.html#overview">Contributions</a></li>
+                <li><a href="contributions.html#deductions">Deductions</a></li>
+                <li><a href="contributions.html#examples">Computation Examples</a></li>
+                <li><a href="contributions.html#bonuses">Bonuses & Benefits</a></li>
+                <li><a href="contributions.html#faq">FAQs</a></li>
             </ul>
         </nav>
     </header>
