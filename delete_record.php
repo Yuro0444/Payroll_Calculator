@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["id"])) {
     $id = intval($_POST["id"]);
     
-    $stmt = $conn->prepare("DELETE FROM employees WHERE id = ?");
+    $stmt = $conn->prepare("DELETE FROM employee WHERE emp_id = ?");
     $stmt->bind_param("i", $id);
     
     if ($stmt->execute()) {

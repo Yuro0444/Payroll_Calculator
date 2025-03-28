@@ -1,107 +1,320 @@
-/* General Page Styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
 }
 
-/* Container Styling */
-.container {
-    background: white;
+header {
+    background: #0056b3;
+    color: #fff;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
     text-align: center;
 }
 
-/* Headings */
-h2, h3 {
-    color: #333;
+header h1 {
+    margin: 10;
+    font-size: 28px;
 }
 
-/* Labels and Inputs */
-label {
-    display: block;
-    margin-top: 10px;
+nav {
+    background: #004494;
+    width: 101.8%;
+    margin-left: -20px;
+    position: relative;
+    transition: background 0.3s ease-in-out;
+}
+
+nav:hover {
+    background: #003377;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    padding: 15px 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #fff;
     font-weight: bold;
-    text-align: left;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+}
+
+nav ul li a:hover {
+    color: #ffcc00;
+    transform: scale(1.1);
+}
+
+nav ul li a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 3px;
+    background: #ffcc00;
+    bottom: -5px;
+    left: 50%;
+    transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
+}
+
+nav ul li a:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+section {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 0px 15px rgba(0, 86, 179, 0.3);
+}
+
+h2, h3 {
+    color: #0056b3;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 5px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+table th {
+    background: #0056b3;
+    color: white;
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #004494;
+    color: white;
+    margin-top: 30px;
+}
+
+
+.container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 50%;
+    max-width: 1500px;
+    height: auto;
+    box-sizing: border-box;
+
+    /* Center the container */
+    margin: 50px auto;
+    display: flex;
+    flex-direction: column;
+ 
+}
+
+
+
+/* Form Styling */
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+
+}
+
+label {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 5px;
 }
 
 input {
     width: 100%;
     padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 5px;
+    font-size: 14px;
+
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.form-container input {
+    width: 95%; /* Makes inputs fill their respective grid space */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+
 }
 
 /* Result Section */
 #result {
     margin-top: 20px;
-    padding: 10px;
     background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-/* Records Table */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 8px;
-    text-align: left;
-}
-
-th {
-    background-color: #007bff;
-    color: white;
-}
-
-/* Buttons */
-button {
-    padding: 5px 10px;
-    border: none;
-    cursor: pointer;
+    padding: 30px;
     border-radius: 5px;
     font-size: 14px;
 }
-
-/* Delete Button */
-.delete-btn {
-    background-color: red;
-    color: white;
+/* Table Container */
+.table-container {
+    margin-top: 20px;
+    max-height: 500px; /* Increased height for larger content */
+    overflow-y: auto;
+    border-radius: 5px;
+    border: 1px solid #ddd;
 }
 
-.delete-btn:hover {
-    background-color: darkred;
+/* Records Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-/* Edit Button */
-.edit-btn {
-    background-color: blue;
-    color: white;
-    margin-left: 5px;
-    padding: 5px 10px;
+th, td {
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+}
+
+th {
+    background-color: #f0f0f0;
+    font-weight: 600;
+}
+
+td {
+    background-color: #fff;
+}
+
+/* Details Row Styling */
+.details-row {
+    background-color: #f9f9f9;
+    display: none;
+    border-left: 3px solid #6c757d;
+    transition: all 0.3s ease-in-out;
+}
+
+.details-row td {
+    padding: 15px;
+}
+
+.details-row div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 15px;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.details-row p {
+    flex: 1 1 250px;
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+}
+
+.details-row p strong {
+    color: #6c757d;
+}
+
+
+/* Buttons */
+button.view-btn {
     border: none;
+    padding: 6px 12px;
     cursor: pointer;
     border-radius: 5px;
-    text-decoration: none;
 }
 
-.edit-btn:hover {
-    background-color: darkblue;
+button.delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+a.edit-btn {
+    background-color: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+a.edit-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Button Styling */
+button {
+    grid-column: span 2;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button.submit {
+    width: 30%;
+    margin: 10px auto 0;
+    display: block;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Improve button spacing */
+td button, td a {
+    display: inline-block;
+    margin: 5px 5px; /* Add spacing between buttons */
+    padding: 8px 12px; /* Improve button size */
+}
+
+/* Ensure button alignment */
+td {
+    white-space: nowrap; /* Prevent buttons from stacking awkwardly */
 }

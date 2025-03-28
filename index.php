@@ -11,51 +11,65 @@ include("db.php");
     <title>Payroll System</title>
     <link rel="stylesheet" href="styles.css">
     <script>
-        async function calculateSalary(event) {
-            if (event.key === "Enter") {
-                
-                let name = document.getElementById("name").value;
-                let hoursWorked = parseFloat(document.getElementById("hoursWorked").value);
-                let hourlyRate = parseFloat(document.getElementById("hourlyRate").value);
+        async function processRecord() {
+            let name = document.getElementById("name").value;
+            let phone_number = document.getElementById("phone_number").value;
+            let email_address = document.getElementById("email_address").value;
+            let city_municipality = document.getElementById("city_municipality").value;
+            let province = document.getElementById("province").value;
+            let position = document.getElementById("position").value;
+            let department = document.getElementById("department").value;
+            let hours_worked = document.getElementById("hours_worked").value;
+            let hourly_rate = document.getElementById("hourly_rate").value;
+            let overtime_hours = document.getElementById("overtime_hours").value;
 
-                if (!isNaN(hoursWorked) && !isNaN(hourlyRate) && name !== "") {
-                    let salary = hoursWorked * hourlyRate;
-                    document.getElementById("salary").value = salary.toFixed(2);
-                    
-                    try {
-                        let response = await fetch("process_salary.php", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ name: name, salary: salary })
-                        });
+            if (!name || !phone_number || !email_address || !city_municipality || !province || !position || !department || isNaN(hours_worked) || isNaN(hourly_rate)) {
+                document.getElementById("result").innerHTML = `<p style="color: red;">Please fill in all fields correctly.</p>`;
+                return;
+            }
 
-                        let result = await response.json();
-                        result.pagibig = Number(result.pagibig) || 0;
-                        result.sss = Number(result.sss) || 0;
-                        result.philhealth = Number(result.philhealth) || 0;
-                        result.taxable_income = Number(result.taxable_income) || 0;
-                        result.withholding_tax = Number(result.withholding_tax) || 0;
-                        result.net_salary = Number(result.net_salary) || 0;
+            if (isNaN(overtime_hours)) {
+                overtime_hours = 0;
+            }
 
+            try {
+                let response = await fetch("process_record.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                            name: name,
+                            phone_number: phone_number,
+                            email_address: email_address,
+                            city_municipality: city_municipality,
+                            province: province,
+                            position: position,
+                            department: department,
+                            hours_worked: parseFloat(hours_worked),
+                            hourly_rate: parseFloat(hourly_rate),
+                            overtime_hours: parseFloat(overtime_hours)
+                        })
+                });
 
-                        if (response.ok) {
-                            document.getElementById("result").innerHTML = `
-                                <p><strong>Name:</strong> ${result.name}</p>
-                                <p><strong>Gross Salary:</strong> ${result.salary.toFixed(2)}</p>
-                                <p><strong>SSS Deduction:</strong> ${result.sss.toFixed(2)}</p>
-                                <p><strong>PhilHealth Deduction:</strong> ${result.philhealth.toFixed(2)}</p>
-                                <p><strong>Pag-IBIG Deduction:</strong> ${result.pagibig.toFixed(2)}</p>  
-                                <p><strong>Taxable Income:</strong> ${result.taxable_income.toFixed(2)}</p>
-                                <p><strong>Withholding Tax:</strong> ${result.withholding_tax.toFixed(2)}</p>
-                                <p><strong>Net Salary:</strong> ${result.net_salary.toFixed(2)}</p> `;
-                            loadRecords();
-                        } else {
-                            document.getElementById("result").innerHTML = `<p style="color:red;">${result.error}</p>`;
-                        }
-                    } catch (error) {
-                        console.error("Error:", error);
-                    }
+                let result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("result").innerHTML = ` 
+                        <p><strong>Name:</strong> ${result.name}</p>
+                        <p><strong>Gross Salary:</strong> ₱${parseFloat(result.salary).toFixed(2)}</p>
+                        <p><strong>Overtime Pay:</strong> ₱${parseFloat(result.overtime_pay).toFixed(2)}</p>
+                        <p><strong>SSS Deduction:</strong> ₱${parseFloat(result.sss).toFixed(2)}</p>
+                        <p><strong>PhilHealth Deduction:</strong> ₱${parseFloat(result.philhealth).toFixed(2)}</p>
+                        <p><strong>Pag-IBIG Deduction:</strong> ₱${parseFloat(result.pagibig).toFixed(2)}</p>
+                        <p><strong>Taxable Income:</strong> ₱${parseFloat(result.taxable_income).toFixed(2)}</p>
+                        <p><strong>Withholding Tax:</strong> ₱${parseFloat(result.withholding_tax).toFixed(2)}</p>
+                        <p><strong>Net Salary:</strong> ₱${parseFloat(result.net_salary).toFixed(2)}</p>
+                    `;
+                    loadRecords();
+                } else {
+                    document.getElementById("result").innerHTML = `<p style="color:red;">${result.error}</p>`;
                 }
+            } catch (error) {
+                console.error("Error:", error);
             }
         }
 
@@ -69,33 +83,39 @@ include("db.php");
             }
         }
 
-        function editRecord(id, name, salary) {
-            document.getElementById("name").value = name;
-            document.getElementById("salary").value = salary;
-            document.getElementById("editId").value = id;
-            document.getElementById("saveButton").style.display = "block";
-        }
+        async function toggleView(id) {
+            let detailsRow = document.getElementById(`details-${id}`);
+            let resultDiv = document.getElementById(`result-${id}`);
+            let button = document.querySelector(`button[onclick="toggleView(${id})"]`);
 
-        async function updateSalary() {
-            let id = document.getElementById("editId").value;
-            let name = document.getElementById("name").value;
-            let salary = document.getElementById("salary").value;
-
-            if (id && name && salary) {
+            if (detailsRow.style.display === "none") {
                 try {
-                    let response = await fetch("update_record.php", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ id: id, name: name, salary: parseFloat(salary) })
-                    });
+                    let response = await fetch(`view_record.php?id=${id}`);
+                    let result = await response.json();
 
-                    let result = await response.text();
-                    alert(result);
-                    loadRecords();
-                    document.getElementById("saveButton").style.display = "none";
+                    if (result.error) {
+                        alert(result.error);
+                    } else {
+                        resultDiv.innerHTML = `
+                            <p><strong>Salary Computations:</strong></p>
+                            <p><strong>Gross Salary:</strong> ₱${parseFloat(result.salary).toFixed(2)}</p>
+                            <p><strong>Overtime Pay:</strong> ₱${parseFloat(result.overtime_pay).toFixed(2)}</p>
+                            <p><strong>SSS Deduction:</strong> ₱${parseFloat(result.sss).toFixed(2)}</p>
+                            <p><strong>PhilHealth Deduction:</strong> ₱${parseFloat(result.philhealth).toFixed(2)}</p>
+                            <p><strong>Pag-IBIG Deduction:</strong> ₱${parseFloat(result.pagibig).toFixed(2)}</p>
+                            <p><strong>Taxable Income:</strong> ₱${parseFloat(result.taxable_income).toFixed(2)}</p>
+                            <p><strong>Withholding Tax:</strong> ₱${parseFloat(result.withholding_tax).toFixed(2)}</p>
+                            <p><strong>Net Salary:</strong> ₱${parseFloat(result.net_salary).toFixed(2)}</p>
+                        `;
+                        detailsRow.style.display = "table-row";
+                        button.innerText = "Hide";
+                    }
                 } catch (error) {
-                    console.error("Error updating record:", error);
+                    console.error("Error fetching record:", error);
                 }
+            } else {
+                detailsRow.style.display = "none";
+                button.innerText = "View";
             }
         }
 
@@ -120,19 +140,61 @@ include("db.php");
     </script>
 </head>
 <body>
+<header>
+        <h1>Salary Computation in the Philippines - 2025 Update</h1>
+        <nav>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="contributions.html">Contributions</a></li>
+                <li><a href="#deductions">Deductions</a></li>
+                <li><a href="#examples">Computation Examples</a></li>
+                <li><a href="#bonuses">Bonuses & Benefits</a></li>
+                <li><a href="#faq">FAQs</a></li>
+            </ul>
+        </nav>
+    </header>
     <div class="container">
         <h2>Payroll System</h2>
-        <label for="name">Employee Name:</label>
-        <input type="text" id="name" placeholder="Enter name">
-        <label for="hoursWorked">Hours Worked:</label>
-        <input type="number" id="hoursWorked" placeholder="Enter hours worked" onkeypress="calculateSalary(event)">
-        <label for="hourlyRate">Hourly Rate:</label>
-        <input type="number" id="hourlyRate" placeholder="Enter hourly rate" onkeypress="calculateSalary(event)">
-        <label for="salary">Gross Salary:</label>
-        <input type="number" id="salary" placeholder="Calculated gross salary" readonly>
+        <form class="form-container">
+            <label for="name">Employee Name:</label>
+            <input type="text" id="name" placeholder="Enter name" maxlength="60">
+
+            <label for="phone_number">Contact Number:</label>
+            <input type="text" id="phone_number" placeholder="Enter Phone Number" maxlength="20">
+
+            <label for="email_address">Email Address:</label>
+            <input type="text" id="email_address" placeholder="Enter Email Address" maxlength="50">
+
+            <label for="city_municipality">City/Municipality:</label>
+            <input type="text" id="city_municipality" placeholder="Enter City/Municipality" maxlength="20">
+
+            <label for="province">Province:</label>
+            <input type="text" id="province" placeholder="Enter Province" maxlength="20">
+
+            <label for="position">Position:</label>
+            <input type="text" id="position" placeholder="Enter Position" maxlength="20">
+
+            <label for="department">Department:</label>
+            <input type="text" id="department" placeholder="Enter Department" maxlength="20">
+
+            <label for="hours_worked">Hours Worked:</label>
+            <input type="number" id="hours_worked" placeholder="Enter Hours Worked" onKeyPress="if(this.value.length==3) return false;">
+
+            <label for="hourly_rate">Hourly Rate:</label>
+            <input type="number" id="hourly_rate" placeholder="Enter Hourly Rate" onKeyPress="if(this.value.length==6) return false;">
+
+            <label for="overtime_hours">Overtime:</label>
+            <input type="number" id="overtime_hours" placeholder="Enter Overtime(optional)" onKeyPress="if(this.value.length==3) return false;">
+
+            <button type="button" class="submit" onclick="processRecord()">Submit</button>
+        </form>
+
         <div id="result"></div>
         <h3>Employee Records</h3>
         <div id="records"></div>
     </div>
+    <footer>
+        <p>&copy; 2025 Salary Guide PH | All Rights Reserved</p>
+    </footer>
 </body>
 </html>

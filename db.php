@@ -12,20 +12,66 @@ try {
     // Create database if not exists
     $conn->exec("CREATE DATABASE IF NOT EXISTS $dbname");
     $conn->exec("USE $dbname");
- 
-    // Create employees table
-    $conn->exec("CREATE TABLE IF NOT EXISTS employees (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
+    
+    // Create employee table
+    $conn->exec("CREATE TABLE IF NOT EXISTS employee (
+        emp_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL
+    )");
+
+    // Create contact table
+    $conn->exec("CREATE TABLE IF NOT EXISTS contact (
+        contact_id INT AUTO_INCREMENT PRIMARY KEY,
+        emp_id INT,
+        phone_number VARCHAR(20),
+        email_address VARCHAR(255),
+        FOREIGN KEY (emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE
+    )");
+
+    // Create address table
+    $conn->exec("CREATE TABLE IF NOT EXISTS address (
+        address_id INT AUTO_INCREMENT PRIMARY KEY,
+        emp_id INT,
+        city_municipality VARCHAR(50),
+        province VARCHAR(50),
+        FOREIGN KEY (emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE
+    )");
+
+    // Create job table
+    $conn->exec("CREATE TABLE IF NOT EXISTS job (
+        job_id INT AUTO_INCREMENT PRIMARY KEY,
+        emp_id INT,
+        position VARCHAR(50),
+        department VARCHAR(50),
+        FOREIGN KEY (emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE
+    )");
+
+    // Create work hours table
+    $conn->exec("CREATE TABLE IF NOT EXISTS work_hours (
+        work_id INT AUTO_INCREMENT PRIMARY KEY,
+        emp_id INT,
+        hours_worked DECIMAL(5,2),
+        hourly_rate DECIMAL(8,2),
+        overtime_hours DECIMAL(5,2),
+        FOREIGN KEY (emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE
+    )");
+
+    // Create payroll table
+    $conn->exec("CREATE TABLE IF NOT EXISTS payroll (
+        payroll_id INT AUTO_INCREMENT PRIMARY KEY,
+        emp_id INT NOT NULL,
         salary DECIMAL(15,2) NOT NULL,
+        overtime_pay DECIMAL (15,2) NOT NULL,
         sss DECIMAL(15,2) NOT NULL,
         philhealth DECIMAL(15,2) NOT NULL,
         pagibig DECIMAL(15,2) NOT NULL,
         taxable_income DECIMAL(15,2) NOT NULL,
         withholding_tax DECIMAL(15,2) NOT NULL,
-        net_salary DECIMAL(15,2) NOT NULL
+        net_salary DECIMAL(15,2) NOT NULL,
+        FOREIGN KEY (emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE
     )");
 
+    // Create sss table
     $conn->exec("CREATE TABLE IF NOT EXISTS sss_bracket (
         id INT AUTO_INCREMENT PRIMARY KEY,
         min_salary DECIMAL(10,2) NOT NULL,
@@ -34,10 +80,9 @@ try {
         rate DECIMAL(5,4) NOT NULL DEFAULT 0.05
     )");         
     
-    // Check if the table is empty
+    // Insert sss data if table is empty
     $stmt = $conn->query("SELECT COUNT(*) FROM sss_bracket");
     if ($stmt->fetchColumn() == 0) {
-        // Insert SSS brackets data
         $conn->exec("INSERT INTO sss_bracket (min_salary, max_salary, monthly_salary_credit, rate) VALUES
             (0.00, 5249.00, 500.00,0.05),
             (5250.00, 5749.99, 5500.00, 0.05),
@@ -103,6 +148,7 @@ try {
 
     }    
 
+    // Create philhealth table
     $conn->exec("CREATE TABLE IF NOT EXISTS philhealth_bracket (
         id INT AUTO_INCREMENT PRIMARY KEY,
         min_salary DECIMAL(10,2) NOT NULL,
@@ -111,16 +157,16 @@ try {
         fixed_contribution DECIMAL(10,2) NOT NULL DEFAULT 0.00
     )");
 
-    // Check if the table is empty
+    // Insert philhealth data if table is empty
     $stmt = $conn->query("SELECT COUNT(*) FROM philhealth_bracket");
     if ($stmt->fetchColumn() == 0) {
-        // Insert PhilHealth brackets data
         $conn->exec("INSERT INTO philhealth_bracket (min_salary, max_salary, rate, fixed_contribution) VALUES
             (0.00, 10000.00, 0.00, 500.00),
             (10000.01, 99999.99, 0.05, 0.00),
             (100000.00, NULL, 0.00, 5000.00)");
             }
-
+    
+    // Create pagibig table
     $conn->exec("CREATE TABLE IF NOT EXISTS pagibig_bracket (
         id INT AUTO_INCREMENT PRIMARY KEY,
         min_salary DECIMAL(10,2) NOT NULL,
@@ -128,17 +174,16 @@ try {
         rate DECIMAL(5,4) NOT NULL DEFAULT 0.00,
         fixed_contribution DECIMAL(10,2) NOT NULL DEFAULT 0.00)");
         
-            // Check if the table is empty
-            $stmt = $conn->query("SELECT COUNT(*) FROM pagibig_bracket");
-            if ($stmt->fetchColumn() == 0) {
-                // Insert Pag-IBIG brackets data
-                $conn->exec("INSERT INTO pagibig_bracket (min_salary, max_salary, rate, fixed_contribution) VALUES
-                    (0.00, 1500.00, 0.01, 0.00),
-                    (1500.01, 10000.00, 0.02, 0.00),
-                    (10000.01, NULL, 0.00, 200.00)");
-            } 
+    // Insert pagibig data if table is empty
+    $stmt = $conn->query("SELECT COUNT(*) FROM pagibig_bracket");
+    if ($stmt->fetchColumn() == 0) {
+        $conn->exec("INSERT INTO pagibig_bracket (min_salary, max_salary, rate, fixed_contribution) VALUES
+            (0.00, 1500.00, 0.01, 0.00),
+            (1500.01, 10000.00, 0.02, 0.00),
+            (10000.01, NULL, 0.00, 200.00)");
+    } 
 
-         // Create withholding_brackets table
+    // Create withholding_brackets table
     $conn->exec("CREATE TABLE IF NOT EXISTS withholding_tax_bracket (
         id INT AUTO_INCREMENT PRIMARY KEY,
         min_income DECIMAL(15,2) NOT NULL,
@@ -158,7 +203,7 @@ try {
             (166667.00, 666667.00, 33541.80, 0.30),
             (666667.00, 99999999.99, 183541.80, 0.35)");
     }
-    
+
 } catch (PDOException $e) {
     die("Connection failed: " . $e->getMessage());
 }
